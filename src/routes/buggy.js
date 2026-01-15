@@ -10,7 +10,7 @@
  * 
  * EXERCÍCIO: Identifique e corrija os bugs em cada rota!
  * 
- * Dica: Cada rota tem um comentário /* BUG */ indicando
+ * Dica: Cada rota tem um comentário BUG indicando
  * aproximadamente onde o bug está localizado.
  * 
  * =====================================================

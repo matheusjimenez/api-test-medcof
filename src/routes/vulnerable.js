@@ -106,8 +106,7 @@ router.get('/search', async (req, res) => {
  * - Bypass com admin: username: admin' -- , password: qualquer coisa
  * - Bypass com OR: username: ' OR '1'='1' -- , password: qualquer coisa
  * - Ver todos os usuários: username: ' OR '1'='1 , password: ' OR '1'='1
- * - Específico para admin: username: admin'/* , password: */--
- */
+ * - Específico para admin: username: admin'/* , password: */
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
