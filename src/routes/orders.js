@@ -166,8 +166,8 @@ router.post('/', async (req, res) => {
         
         // Cria o pedido
         const orderResult = await query(
-            'INSERT INTO orders (user_id, total, notes) VALUES (?, ?, ?)',
-            [user_id || null, total, notes || null]
+            'INSERT INTO orders (order_number, user_id, total, notes) VALUES (?, ?, ?, ?)',
+            [Math.random()* 1000, user_id || null, total, notes || null]
         );
         
         const orderId = orderResult.insertId;
