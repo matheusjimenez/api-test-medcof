@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Grão & Código API",
-    "description": "Collection para a prova prática de desenvolvedores Junior.\n\n☕ API de gestão de uma cafeteria gourmet.\n\n**Seções:**\n- 🔍 Exploração: Rotas seguras para testes\n- 🚩 CTF: Rotas vulneráveis a SQL Injection\n- 🐛 Buggy: Rotas com bugs para correção",
+    "description": "Collection para a prova prática de desenvolvedores Junior.\n\n☕ API de gestão de uma cafeteria gourmet.\n\n**Seções:**\n- 🎯 Exercícios: Preencha as lacunas nos query params\n- 🔍 Exploração: Rotas seguras para testes\n- 🚩 CTF: Rotas vulneráveis a SQL Injection\n- 🐛 Buggy: Rotas com bugs para correção",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -26,6 +26,196 @@
           "request": {
             "method": "GET",
             "url": "{{base_url}}/api/docs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎯 Exercícios - Query Params",
+      "description": "📝 EXERCÍCIOS PRÁTICOS\n\nComplete os valores dos query parameters para fazer as requisições funcionarem!\n\n⚠️ Substitua os valores {{PREENCHA_...}} pelos valores corretos.",
+      "item": [
+        {
+          "name": "Ex 2.1 - Filtrar Produtos por Categoria",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?category={{PREENCHA_ID_CATEGORIA}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "category", "value": "{{PREENCHA_ID_CATEGORIA}}", "description": "💡 Dica: Use o ID da categoria (ex: 1, 2, 3...)" }
+              ]
+            },
+            "description": "🎯 Objetivo: Buscar produtos de uma categoria específica.\n\n📝 Instruções:\n1. Substitua {{PREENCHA_ID_CATEGORIA}} por um número (ID da categoria)\n2. Execute a requisição e veja os produtos filtrados\n\n💡 Dica: Use GET /api/categories para ver as categorias disponíveis"
+          }
+        },
+        {
+          "name": "Ex 2.2 - Filtrar Produtos por Faixa de Preço",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?minPrice={{PREENCHA_PRECO_MIN}}&maxPrice={{PREENCHA_PRECO_MAX}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "minPrice", "value": "{{PREENCHA_PRECO_MIN}}", "description": "💡 Preço mínimo (ex: 10)" },
+                { "key": "maxPrice", "value": "{{PREENCHA_PRECO_MAX}}", "description": "💡 Preço máximo (ex: 50)" }
+              ]
+            },
+            "description": "🎯 Objetivo: Buscar produtos dentro de uma faixa de preço.\n\n📝 Instruções:\n1. Substitua {{PREENCHA_PRECO_MIN}} pelo preço mínimo desejado\n2. Substitua {{PREENCHA_PRECO_MAX}} pelo preço máximo desejado\n3. Execute e veja os produtos na faixa\n\n💡 Dica: Tente buscar produtos entre R$10 e R$50"
+          }
+        },
+        {
+          "name": "Ex 2.3 - Filtrar Produtos Ativos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?active={{PREENCHA_BOOLEANO}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "active", "value": "{{PREENCHA_BOOLEANO}}", "description": "💡 Use: true ou false" }
+              ]
+            },
+            "description": "🎯 Objetivo: Filtrar produtos por status ativo/inativo.\n\n📝 Instruções:\n1. Substitua {{PREENCHA_BOOLEANO}} por 'true' ou 'false'\n2. Compare os resultados de active=true vs active=false\n\n💡 Pergunta: Quantos produtos inativos existem?"
+          }
+        },
+        {
+          "name": "Ex 2.4 - Filtrar Usuários por Cargo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users?role={{PREENCHA_CARGO}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "role", "value": "{{PREENCHA_CARGO}}", "description": "💡 Cargos: admin, gerente, barista, atendente, cliente" }
+              ]
+            },
+            "description": "🎯 Objetivo: Buscar usuários por cargo.\n\n📝 Instruções:\n1. Substitua {{PREENCHA_CARGO}} pelo cargo desejado\n2. Teste com diferentes cargos\n\n💡 Cargos disponíveis: admin, gerente, barista, atendente, cliente"
+          }
+        },
+        {
+          "name": "Ex 2.5 - Filtrar Pedidos por Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/orders?status={{PREENCHA_STATUS}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"],
+              "query": [
+                { "key": "status", "value": "{{PREENCHA_STATUS}}", "description": "💡 Status: pending, preparing, ready, delivered, cancelled" }
+              ]
+            },
+            "description": "🎯 Objetivo: Filtrar pedidos por status.\n\n📝 Instruções:\n1. Substitua {{PREENCHA_STATUS}} pelo status desejado\n2. Teste todos os status diferentes\n\n💡 Status possíveis: pending, preparing, ready, delivered, cancelled"
+          }
+        },
+        {
+          "name": "Ex 2.6 - DESAFIO: Combinar Múltiplos Filtros",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?{{PREENCHA_PARAM1}}={{PREENCHA_VALOR1}}&{{PREENCHA_PARAM2}}={{PREENCHA_VALOR2}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "{{PREENCHA_PARAM1}}", "value": "{{PREENCHA_VALOR1}}", "description": "💡 Escolha: category, minPrice, maxPrice, ou active" },
+                { "key": "{{PREENCHA_PARAM2}}", "value": "{{PREENCHA_VALOR2}}", "description": "💡 Combine com outro filtro!" }
+              ]
+            },
+            "description": "🎯 DESAFIO: Combinar dois ou mais filtros!\n\n📝 Objetivo: Buscar produtos da categoria 2 que custam no máximo R$20\n\n📝 Instruções:\n1. Preencha os nomes dos parâmetros (keys)\n2. Preencha os valores\n3. Execute e valide o resultado\n\n💡 Dica: Use 'category' e 'maxPrice'"
+          }
+        },
+        {
+          "name": "✅ GABARITO - 2.1 Categoria",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?category=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "category", "value": "1" }
+              ]
+            },
+            "description": "✅ Resposta correta do Exercício 2.1"
+          }
+        },
+        {
+          "name": "✅ GABARITO - 2.2 Faixa de Preço",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?minPrice=10&maxPrice=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "minPrice", "value": "10" },
+                { "key": "maxPrice", "value": "50" }
+              ]
+            },
+            "description": "✅ Resposta correta do Exercício 2.2"
+          }
+        },
+        {
+          "name": "✅ GABARITO - 2.3 Ativos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?active=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "active", "value": "true" }
+              ]
+            },
+            "description": "✅ Resposta correta do Exercício 2.3"
+          }
+        },
+        {
+          "name": "✅ GABARITO - 2.4 Cargo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users?role=barista",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "role", "value": "barista" }
+              ]
+            },
+            "description": "✅ Resposta correta do Exercício 2.4"
+          }
+        },
+        {
+          "name": "✅ GABARITO - 2.5 Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/orders?status=delivered",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"],
+              "query": [
+                { "key": "status", "value": "delivered" }
+              ]
+            },
+            "description": "✅ Resposta correta do Exercício 2.5"
+          }
+        },
+        {
+          "name": "✅ GABARITO - 2.6 Desafio",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?category=2&maxPrice=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "category", "value": "2" },
+                { "key": "maxPrice", "value": "20" }
+              ]
+            },
+            "description": "✅ Resposta correta do Exercício 2.6 - Desafio"
           }
         }
       ]

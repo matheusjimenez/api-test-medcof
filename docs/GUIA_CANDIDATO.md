@@ -86,15 +86,109 @@ GET http://localhost:3000/api/orders
 GET http://localhost:3000/api/users
 ```
 
-### 2. Use filtros (query params)
+### 2. Use filtros (query params) - 🎯 EXERCÍCIO
+
+> **📝 Exercício:** Complete as URLs abaixo com os parâmetros de query corretos.
+> Use o Postman para testar suas respostas!
+
+**Sintaxe de Query Params:**
+```
+GET http://localhost:3000/api/recurso?parametro=valor&outroParametro=valor2
+```
+
+---
+
+#### 🔹 Exercício 2.1 - Filtrar Produtos por Categoria
+**Objetivo:** Buscar todos os produtos da categoria de ID `1`
+```
+GET http://localhost:3000/api/products?____________
+```
+<details>
+<summary>💡 Dica</summary>
+O parâmetro se chama <code>category</code> e recebe o ID da categoria.
+</details>
+
+---
+
+#### 🔹 Exercício 2.2 - Filtrar Produtos por Faixa de Preço
+**Objetivo:** Buscar produtos entre R$ 10,00 e R$ 50,00
+```
+GET http://localhost:3000/api/products?____________&____________
+```
+<details>
+<summary>💡 Dica</summary>
+Use os parâmetros <code>minPrice</code> e <code>maxPrice</code>.
+</details>
+
+---
+
+#### 🔹 Exercício 2.3 - Filtrar Produtos Ativos
+**Objetivo:** Buscar apenas produtos que estão ativos
+```
+GET http://localhost:3000/api/products?____________
+```
+<details>
+<summary>💡 Dica</summary>
+O parâmetro se chama <code>active</code> e aceita valores booleanos.
+</details>
+
+---
+
+#### 🔹 Exercício 2.4 - Filtrar Usuários por Cargo
+**Objetivo:** Buscar todos os usuários com cargo de "barista"
+```
+GET http://localhost:3000/api/users?____________
+```
+<details>
+<summary>💡 Dica</summary>
+O parâmetro se chama <code>role</code>.
+</details>
+
+---
+
+#### 🔹 Exercício 2.5 - Filtrar Pedidos por Status
+**Objetivo:** Buscar pedidos que já foram entregues
+```
+GET http://localhost:3000/api/orders?____________
+```
+<details>
+<summary>💡 Dica</summary>
+O parâmetro se chama <code>status</code>. Status possíveis: pending, preparing, ready, delivered, cancelled.
+</details>
+
+---
+
+#### 🔹 Exercício 2.6 - Combinando Filtros (Desafio)
+**Objetivo:** Buscar produtos da categoria `2` que custam no máximo R$ 20,00
+```
+GET http://localhost:3000/api/products?____________&____________
+```
+
+---
+
+<details>
+<summary>✅ Ver Gabarito Completo</summary>
 
 ```
+# 2.1 - Filtrar por categoria
 GET http://localhost:3000/api/products?category=1
+
+# 2.2 - Filtrar por faixa de preço
 GET http://localhost:3000/api/products?minPrice=10&maxPrice=50
+
+# 2.3 - Filtrar produtos ativos
 GET http://localhost:3000/api/products?active=true
+
+# 2.4 - Filtrar por cargo
 GET http://localhost:3000/api/users?role=barista
+
+# 2.5 - Filtrar por status
 GET http://localhost:3000/api/orders?status=delivered
+
+# 2.6 - Combinando filtros
+GET http://localhost:3000/api/products?category=2&maxPrice=20
 ```
+</details>
 
 ### 3. Busque itens específicos
 
