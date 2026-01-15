@@ -1,0 +1,492 @@
+{
+  "info": {
+    "name": "Grão & Código API",
+    "description": "Collection para a prova prática de desenvolvedores Junior.\n\n☕ API de gestão de uma cafeteria gourmet.\n\n**Seções:**\n- 🔍 Exploração: Rotas seguras para testes\n- 🚩 CTF: Rotas vulneráveis a SQL Injection\n- 🐛 Buggy: Rotas com bugs para correção",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏠 Health Check",
+      "item": [
+        {
+          "name": "Home",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/"
+          }
+        },
+        {
+          "name": "API Docs",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/docs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Exploração - Produtos",
+      "item": [
+        {
+          "name": "Listar Todos Produtos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/products"
+          }
+        },
+        {
+          "name": "Filtrar por Categoria",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?category=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "category", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtrar por Preço",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/products?minPrice=10&maxPrice=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "minPrice", "value": "10" },
+                { "key": "maxPrice", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Produto por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/products/1"
+          }
+        },
+        {
+          "name": "Criar Produto",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/products",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Café Gelado Premium\",\n    \"description\": \"Café gelado com leite condensado\",\n    \"price\": 16.00,\n    \"stock\": 30,\n    \"category_id\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar Produto",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/products/1",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 8.00,\n    \"stock\": 150\n}"
+            }
+          }
+        },
+        {
+          "name": "Deletar Produto (Soft Delete)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/products/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Exploração - Categorias",
+      "item": [
+        {
+          "name": "Listar Categorias",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/categories"
+          }
+        },
+        {
+          "name": "Categoria com Produtos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/categories/1"
+          }
+        },
+        {
+          "name": "Criar Categoria",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/categories",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Especiais\",\n    \"description\": \"Produtos especiais da casa\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Exploração - Usuários",
+      "item": [
+        {
+          "name": "Listar Usuários",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/users"
+          }
+        },
+        {
+          "name": "Filtrar por Cargo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users?role=barista",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "role", "value": "barista" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Usuário por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/users/3"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Exploração - Pedidos",
+      "item": [
+        {
+          "name": "Listar Pedidos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/orders"
+          }
+        },
+        {
+          "name": "Filtrar por Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/orders?status=delivered",
+              "host": ["{{base_url}}"],
+              "path": ["api", "orders"],
+              "query": [
+                { "key": "status", "value": "delivered" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Detalhes do Pedido",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/orders/1"
+          }
+        },
+        {
+          "name": "Criar Pedido",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/orders",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": 5,\n    \"items\": [\n        { \"product_id\": 1, \"quantity\": 2 },\n        { \"product_id\": 2, \"quantity\": 1 },\n        { \"product_id\": 13, \"quantity\": 1 }\n    ],\n    \"notes\": \"Sem açúcar no café\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar Status",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/orders/1/status",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"preparing\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔍 Exploração - Autenticação",
+      "item": [
+        {
+          "name": "Login (Seguro)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"barista_joao\",\n    \"password\": \"cafezinho\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Registrar Usuário",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/register",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"novo_barista\",\n    \"password\": \"senha123456\",\n    \"email\": \"novo@cafeteria.com\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚩 CTF - SQL Injection",
+      "description": "⚠️ ROTAS VULNERÁVEIS - Use para aprender sobre SQL Injection",
+      "item": [
+        {
+          "name": "Ver Desafios CTF",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/vulnerable/flags"
+          }
+        },
+        {
+          "name": "Busca Normal",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/vulnerable/search?q=café",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vulnerable", "search"],
+              "query": [
+                { "key": "q", "value": "café" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Busca - Teste de Vulnerabilidade",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/vulnerable/search?q='",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vulnerable", "search"],
+              "query": [
+                { "key": "q", "value": "'" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Busca - OR Injection",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/vulnerable/search?q=' OR '1'='1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vulnerable", "search"],
+              "query": [
+                { "key": "q", "value": "' OR '1'='1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login Vulnerável - Normal",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/vulnerable/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"senha_errada\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Vulnerável - Bypass",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/vulnerable/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"admin' --\",\n    \"password\": \"qualquer\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Produto Vulnerável - Normal",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/vulnerable/product/1"
+          }
+        },
+        {
+          "name": "Usuários Vulnerável - Ver Todos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/vulnerable/users?role=' OR '1'='1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vulnerable", "users"],
+              "query": [
+                { "key": "role", "value": "' OR '1'='1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Order By Vulnerável",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/vulnerable/order?sort=price",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vulnerable", "order"],
+              "query": [
+                { "key": "sort", "value": "price" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🐛 Buggy - Correção de Bugs",
+      "description": "Rotas com bugs propositais para correção",
+      "item": [
+        {
+          "name": "Lista de Bugs",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/buggy"
+          }
+        },
+        {
+          "name": "Bug #1 - Comparação de Tipos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/buggy/products"
+          }
+        },
+        {
+          "name": "Bug #2 - Cálculo Total",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/buggy/total/1"
+          }
+        },
+        {
+          "name": "Bug #3 - Async/Await (Criar)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/buggy/order",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_id\": 5,\n    \"items\": [\n        { \"product_id\": 1, \"quantity\": 2 },\n        { \"product_id\": 2, \"quantity\": 1 }\n    ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Bug #4 - Off-by-One Ranking",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/buggy/ranking"
+          }
+        },
+        {
+          "name": "Bug #5 - Validação (Desconto Negativo)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/buggy/discount",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": 1,\n    \"discount_percent\": -50\n}"
+            }
+          }
+        },
+        {
+          "name": "Bug #5 - Validação (Desconto 150%)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/buggy/discount",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": 1,\n    \"discount_percent\": 150\n}"
+            }
+          }
+        },
+        {
+          "name": "Bug #6 - Escopo de Variável",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/buggy/summary"
+          }
+        }
+      ]
+    }
+  ]
+}

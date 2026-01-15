@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Serviço da API Node.js
+  api:
+    build: .
+    container_name: grao-codigo-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=cafeteria
+      - DB_PASSWORD=cafeteria123
+      - DB_NAME=grao_codigo
+      - PORT=3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+    networks:
+      - cafeteria-network
+    restart: unless-stopped
+
+  # Serviço do MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: grao-codigo-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_DATABASE=grao_codigo
+      - MYSQL_USER=cafeteria
+      - MYSQL_PASSWORD=cafeteria123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cafeteria-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  cafeteria-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
