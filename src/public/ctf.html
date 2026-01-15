@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚩 CTF - SQL Injection Challenge | Grão & Código</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;700&display=swap');
+        
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-input: #21262d;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-blue: #58a6ff;
+            --accent-purple: #a371f7;
+            --accent-orange: #db6d28;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at top, rgba(88, 166, 255, 0.1), transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(163, 113, 247, 0.1), transparent 50%);
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--bg-card), transparent);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .score-item {
+            background: var(--bg-input);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .score-item .value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .score-item .label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .challenge-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .challenge-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .challenge-header {
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .challenge-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .challenge-points {
+            background: var(--accent-purple);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .difficulty-beginner { border-left: 4px solid var(--accent-green); }
+        .difficulty-easy { border-left: 4px solid var(--accent-blue); }
+        .difficulty-medium { border-left: 4px solid var(--accent-yellow); }
+        .difficulty-hard { border-left: 4px solid var(--accent-red); }
+        
+        .challenge-body {
+            padding: 1.25rem;
+        }
+        
+        .challenge-objective {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+        
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+        
+        .input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green), #238636);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(63, 185, 80, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent-blue);
+        }
+        
+        .response-area {
+            margin-top: 1rem;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            max-height: 300px;
+            overflow: auto;
+        }
+        
+        .response-header {
+            padding: 0.5rem 1rem;
+            background: var(--bg-input);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            position: sticky;
+            top: 0;
+        }
+        
+        .status-success { color: var(--accent-green); }
+        .status-error { color: var(--accent-red); }
+        
+        .response-body {
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .flag-found {
+            background: linear-gradient(135deg, rgba(63, 185, 80, 0.2), rgba(35, 134, 54, 0.1));
+            border: 1px solid var(--accent-green);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.4); }
+            50% { box-shadow: 0 0 20px 5px rgba(63, 185, 80, 0.2); }
+        }
+        
+        .hint-box {
+            background: rgba(210, 153, 34, 0.1);
+            border: 1px solid var(--accent-yellow);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--accent-yellow);
+        }
+        
+        .sql-playground {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .sql-playground h2 {
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+        
+        .endpoint-selector {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        
+        .endpoint-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .endpoint-btn:hover, .endpoint-btn.active {
+            border-color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.1);
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+        
+        .method-get { background: var(--accent-green); color: #000; }
+        .method-post { background: var(--accent-yellow); color: #000; }
+        
+        .flags-collected {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+        
+        .flags-collected h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .flags-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .flag-item {
+            background: var(--bg-input);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .flag-item.found {
+            border-color: var(--accent-green);
+            background: rgba(63, 185, 80, 0.1);
+        }
+        
+        .flag-item.not-found {
+            opacity: 0.5;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .challenges-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚩 CTF - SQL Injection Challenge</h1>
+            <p class="subtitle">Encontre todas as flags escondidas usando técnicas de SQL Injection!</p>
+            
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="value" id="flagsFound">0</div>
+                    <div class="label">Flags Encontradas</div>
+                </div>
+                <div class="score-item">
+                    <div class="value" id="totalPoints">0</div>
+                    <div class="label">Pontos</div>
+                </div>
+                <div class="score-item">
+                    <div class="value">520</div>
+                    <div class="label">Total Possível</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- SQL Playground -->
+        <div class="sql-playground">
+            <h2>🧪 SQL Injection Playground</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                Selecione um endpoint e injete seus payloads SQL para explorar as vulnerabilidades.
+            </p>
+            
+            <div class="endpoint-selector">
+                <button class="endpoint-btn active" data-endpoint="/api/vulnerable/users" data-method="GET" data-param="role">
+                    <span class="method-badge method-get">GET</span>/users
+                </button>
+                <button class="endpoint-btn" data-endpoint="/api/vulnerable/search" data-method="GET" data-param="q">
+                    <span class="method-badge method-get">GET</span>/search
+                </button>
+                <button class="endpoint-btn" data-endpoint="/api/vulnerable/product/" data-method="GET" data-param="id">
+                    <span class="method-badge method-get">GET</span>/product/:id
+                </button>
+                <button class="endpoint-btn" data-endpoint="/api/vulnerable/promo" data-method="GET" data-param="code">
+                    <span class="method-badge method-get">GET</span>/promo
+                </button>
+                <button class="endpoint-btn" data-endpoint="/api/vulnerable/notes" data-method="GET" data-param="priority">
+                    <span class="method-badge method-get">GET</span>/notes
+                </button>
+                <button class="endpoint-btn" data-endpoint="/api/vulnerable/tables" data-method="GET" data-param="schema">
+                    <span class="method-badge method-get">GET</span>/tables
+                </button>
+                <button class="endpoint-btn" data-endpoint="/api/vulnerable/login" data-method="POST" data-param="body">
+                    <span class="method-badge method-post">POST</span>/login
+                </button>
+            </div>
+            
+            <div id="playgroundInputs">
+                <div class="input-group">
+                    <label id="paramLabel">Parâmetro: role</label>
+                    <input type="text" id="payloadInput" placeholder="Digite seu payload SQL aqui...">
+                </div>
+            </div>
+            
+            <div id="postBodyInput" style="display: none;">
+                <div class="input-group">
+                    <label>Body JSON:</label>
+                    <textarea id="jsonBody" placeholder='{"username": "admin", "password": "senha"}'></textarea>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button class="btn btn-primary" onclick="executePayload()">
+                    ⚡ Executar Payload
+                </button>
+                <button class="btn btn-secondary" onclick="showHint()">
+                    💡 Dica
+                </button>
+            </div>
+            
+            <div class="response-area" id="playgroundResponse" style="display: none;">
+                <div class="response-header">
+                    <span id="responseStatus">Resposta</span>
+                    <span id="responseTime"></span>
+                </div>
+                <pre class="response-body" id="responseBody"></pre>
+            </div>
+            
+            <div class="hint-box" id="hintBox" style="display: none;"></div>
+        </div>
+
+        <!-- Challenges Grid -->
+        <h2 style="margin-bottom: 1.5rem;">📋 Desafios</h2>
+        <div class="challenges-grid">
+            
+            <!-- Desafio 1: Usuários Inativos -->
+            <div class="challenge-card difficulty-beginner">
+                <div class="challenge-header">
+                    <span class="challenge-title">🟢 Usuários Escondidos</span>
+                    <span class="challenge-points">25 pts</span>
+                </div>
+                <div class="challenge-body">
+                    <p class="challenge-objective">
+                        A API de usuários só mostra usuários <strong>ATIVOS</strong> por padrão. 
+                        Existe um usuário inativo chamado <code>suporte_tech</code> que tem uma senha muito interessante...
+                    </p>
+                    <div class="input-group">
+                        <label>GET /api/vulnerable/users?role=</label>
+                        <input type="text" id="challenge1Input" placeholder="admin">
+                    </div>
+                    <button class="btn btn-primary" onclick="runChallenge1()">Executar</button>
+                    <div class="response-area" id="challenge1Response" style="display: none;">
+                        <div class="response-header">
+                            <span class="response-status">Resposta</span>
+                        </div>
+                        <pre class="response-body" id="challenge1Body"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desafio 2: Ver Senhas -->
+            <div class="challenge-card difficulty-easy">
+                <div class="challenge-header">
+                    <span class="challenge-title">🟢 Campo Oculto: Password</span>
+                    <span class="challenge-points">25 pts</span>
+                </div>
+                <div class="challenge-body">
+                    <p class="challenge-objective">
+                        O endpoint de usuários não retorna o campo <code>password</code>. 
+                        Use UNION SELECT para extrair senhas de outra forma, ou descubra como modificar a query original.
+                    </p>
+                    <div class="input-group">
+                        <label>Payload para ver senhas:</label>
+                        <input type="text" id="challenge2Input" placeholder="Tente diferentes payloads...">
+                    </div>
+                    <button class="btn btn-primary" onclick="runChallenge2()">Executar</button>
+                    <div class="response-area" id="challenge2Response" style="display: none;">
+                        <div class="response-header">
+                            <span class="response-status">Resposta</span>
+                        </div>
+                        <pre class="response-body" id="challenge2Body"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desafio 3: Login Bypass -->
+            <div class="challenge-card difficulty-hard">
+                <div class="challenge-header">
+                    <span class="challenge-title">🔴 Bypass de Autenticação</span>
+                    <span class="challenge-points">100 pts</span>
+                </div>
+                <div class="challenge-body">
+                    <p class="challenge-objective">
+                        Faça login como <strong>admin</strong> sem saber a senha real! 
+                        Use SQL Injection para bypassar a autenticação.
+                    </p>
+                    <div class="input-group">
+                        <label>Username:</label>
+                        <input type="text" id="loginUsername" placeholder="admin">
+                    </div>
+                    <div class="input-group">
+                        <label>Password:</label>
+                        <input type="text" id="loginPassword" placeholder="qualquer coisa">
+                    </div>
+                    <button class="btn btn-primary" onclick="runLoginChallenge()">🔓 Tentar Login</button>
+                    <div class="response-area" id="loginResponse" style="display: none;">
+                        <div class="response-header">
+                            <span class="response-status">Resposta</span>
+                        </div>
+                        <pre class="response-body" id="loginBody"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desafio 4: UNION SELECT -->
+            <div class="challenge-card difficulty-medium">
+                <div class="challenge-header">
+                    <span class="challenge-title">🟡 UNION SELECT Master</span>
+                    <span class="challenge-points">50 pts</span>
+                </div>
+                <div class="challenge-body">
+                    <p class="challenge-objective">
+                        Use UNION SELECT no endpoint de produtos para extrair dados da tabela <code>secret_flags</code>.
+                        Dica: A query de produto tem 15 colunas.
+                    </p>
+                    <div class="input-group">
+                        <label>GET /api/vulnerable/product/</label>
+                        <input type="text" id="challenge4Input" placeholder="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="runChallenge4()">Executar</button>
+                    <div class="response-area" id="challenge4Response" style="display: none;">
+                        <div class="response-header">
+                            <span class="response-status">Resposta</span>
+                        </div>
+                        <pre class="response-body" id="challenge4Body"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desafio 5: Promoção Secreta -->
+            <div class="challenge-card difficulty-easy">
+                <div class="challenge-header">
+                    <span class="challenge-title">🟢 Código Promocional Secreto</span>
+                    <span class="challenge-points">30 pts</span>
+                </div>
+                <div class="challenge-body">
+                    <p class="challenge-objective">
+                        Existe um código promocional escondido com 99% de desconto! 
+                        Liste todas as promoções para encontrá-lo.
+                    </p>
+                    <div class="input-group">
+                        <label>GET /api/vulnerable/promo?code=</label>
+                        <input type="text" id="challenge5Input" placeholder="VIP10">
+                    </div>
+                    <button class="btn btn-primary" onclick="runChallenge5()">Executar</button>
+                    <div class="response-area" id="challenge5Response" style="display: none;">
+                        <div class="response-header">
+                            <span class="response-status">Resposta</span>
+                        </div>
+                        <pre class="response-body" id="challenge5Body"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desafio 6: Notas Admin -->
+            <div class="challenge-card difficulty-medium">
+                <div class="challenge-header">
+                    <span class="challenge-title">🟠 Notas Confidenciais</span>
+                    <span class="challenge-points">80 pts</span>
+                </div>
+                <div class="challenge-body">
+                    <p class="challenge-objective">
+                        A tabela <code>admin_notes</code> contém informações sensíveis! 
+                        Uma das notas com prioridade "critical" tem uma flag.
+                    </p>
+                    <div class="input-group">
+                        <label>GET /api/vulnerable/notes?priority=</label>
+                        <input type="text" id="challenge6Input" placeholder="high">
+                    </div>
+                    <button class="btn btn-primary" onclick="runChallenge6()">Executar</button>
+                    <div class="response-area" id="challenge6Response" style="display: none;">
+                        <div class="response-header">
+                            <span class="response-status">Resposta</span>
+                        </div>
+                        <pre class="response-body" id="challenge6Body"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flags Coletadas -->
+        <div class="flags-collected">
+            <h3>🏆 Flags Coletadas</h3>
+            <div class="flags-list" id="flagsList">
+                <div class="flag-item not-found" data-flag="Flag{SQL_1nj3ct10n_M4st3r}">
+                    <span>???</span>
+                    <span>25 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{4dm1n_P4ssw0rd_L34k3d}">
+                    <span>???</span>
+                    <span>100 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{Un10n_S3l3ct_Pr0}">
+                    <span>???</span>
+                    <span>50 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{Pr0m0_C0d3_Hunt3r}">
+                    <span>???</span>
+                    <span>30 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{4dm1n_N0t3s_F0und}">
+                    <span>???</span>
+                    <span>80 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{H0n3yp0t_D3t3ct3d}">
+                    <span>???</span>
+                    <span>50 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{W3lc0m3_t0_SQL_W0rld}">
+                    <span>???</span>
+                    <span>10 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{1nf0rm4t10n_Sch3m4}">
+                    <span>???</span>
+                    <span>60 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{4dm1n_4cc3ss_Gr4nt3d}">
+                    <span>???</span>
+                    <span>75 pts</span>
+                </div>
+                <div class="flag-item not-found" data-flag="Flag{Pr0duct_Hunt3r_Pr0}">
+                    <span>???</span>
+                    <span>40 pts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado do jogo
+        let foundFlags = JSON.parse(localStorage.getItem('ctfFlags') || '[]');
+        let totalPoints = 0;
+        
+        const flagPoints = {
+            'Flag{SQL_1nj3ct10n_M4st3r}': 25,
+            'Flag{4dm1n_P4ssw0rd_L34k3d}': 100,
+            'Flag{Un10n_S3l3ct_Pr0}': 50,
+            'Flag{Pr0m0_C0d3_Hunt3r}': 30,
+            'Flag{4dm1n_N0t3s_F0und}': 80,
+            'Flag{H0n3yp0t_D3t3ct3d}': 50,
+            'Flag{W3lc0m3_t0_SQL_W0rld}': 10,
+            'Flag{1nf0rm4t10n_Sch3m4}': 60,
+            'Flag{4dm1n_4cc3ss_Gr4nt3d}': 75,
+            'Flag{Pr0duct_Hunt3r_Pr0}': 40
+        };
+
+        const hints = {
+            '/api/vulnerable/users': "Tente: ' OR active=0 -- para ver usuários inativos, ou ' OR '1'='1' -- para ver todos",
+            '/api/vulnerable/search': "Tente: ' UNION SELECT flag_code,flag_name,hint,points,5,6,7,8,9 FROM secret_flags --",
+            '/api/vulnerable/product/': "Use UNION SELECT com 15 colunas: 0 UNION SELECT 1,flag_code,flag_name,4,5,6,7,8,9,10,11,12,13,14,15 FROM secret_flags",
+            '/api/vulnerable/promo': "Tente: ' OR '1'='1 para ver todas as promoções",
+            '/api/vulnerable/notes': "Tente: ' OR '1'='1 para ver todas as notas",
+            '/api/vulnerable/tables': "Use para descobrir todas as tabelas do banco!",
+            '/api/vulnerable/login': "Tente username: admin' -- e qualquer senha"
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            updateScoreboard();
+            setupEndpointButtons();
+        });
+
+        function updateScoreboard() {
+            totalPoints = foundFlags.reduce((sum, flag) => sum + (flagPoints[flag] || 0), 0);
+            document.getElementById('flagsFound').textContent = foundFlags.length;
+            document.getElementById('totalPoints').textContent = totalPoints;
+            
+            // Atualiza lista de flags
+            document.querySelectorAll('.flag-item').forEach(item => {
+                const flag = item.dataset.flag;
+                if (foundFlags.includes(flag)) {
+                    item.classList.remove('not-found');
+                    item.classList.add('found');
+                    item.querySelector('span').textContent = flag;
+                }
+            });
+        }
+
+        function registerFlag(flag) {
+            if (flag && !foundFlags.includes(flag)) {
+                foundFlags.push(flag);
+                localStorage.setItem('ctfFlags', JSON.stringify(foundFlags));
+                updateScoreboard();
+                return true;
+            }
+            return false;
+        }
+
+        function checkForFlags(responseText) {
+            const flagPattern = /Flag\{[^}]+\}/g;
+            const matches = responseText.match(flagPattern) || [];
+            matches.forEach(flag => {
+                if (registerFlag(flag)) {
+                    showFlagNotification(flag);
+                }
+            });
+        }
+
+        function showFlagNotification(flag) {
+            const points = flagPoints[flag] || 0;
+            const notification = document.createElement('div');
+            notification.className = 'flag-found';
+            notification.innerHTML = `🚩 <strong>FLAG ENCONTRADA!</strong><br>${flag}<br>+${points} pontos!`;
+            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; max-width: 300px;';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        function setupEndpointButtons() {
+            document.querySelectorAll('.endpoint-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.endpoint-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const param = btn.dataset.param;
+                    const method = btn.dataset.method;
+                    
+                    document.getElementById('paramLabel').textContent = `Parâmetro: ${param}`;
+                    document.getElementById('postBodyInput').style.display = method === 'POST' ? 'block' : 'none';
+                    document.getElementById('playgroundInputs').style.display = method === 'POST' ? 'none' : 'block';
+                    document.getElementById('hintBox').style.display = 'none';
+                });
+            });
+        }
+
+        async function executePayload() {
+            const activeBtn = document.querySelector('.endpoint-btn.active');
+            const endpoint = activeBtn.dataset.endpoint;
+            const method = activeBtn.dataset.method;
+            const param = activeBtn.dataset.param;
+            
+            let url, options = { method };
+            
+            if (method === 'POST') {
+                url = endpoint;
+                const body = document.getElementById('jsonBody').value;
+                try {
+                    options.headers = { 'Content-Type': 'application/json' };
+                    options.body = body;
+                } catch (e) {
+                    alert('JSON inválido!');
+                    return;
+                }
+            } else {
+                const payload = document.getElementById('payloadInput').value;
+                if (param === 'id') {
+                    url = endpoint + encodeURIComponent(payload);
+                } else {
+                    url = `${endpoint}?${param}=${encodeURIComponent(payload)}`;
+                }
+            }
+            
+            const startTime = Date.now();
+            
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                const endTime = Date.now();
+                
+                const responseArea = document.getElementById('playgroundResponse');
+                const responseBody = document.getElementById('responseBody');
+                const responseStatus = document.getElementById('responseStatus');
+                const responseTime = document.getElementById('responseTime');
+                
+                responseArea.style.display = 'block';
+                responseBody.textContent = JSON.stringify(data, null, 2);
+                responseStatus.textContent = response.ok ? '✅ Sucesso' : '❌ Erro';
+                responseStatus.className = response.ok ? 'status-success' : 'status-error';
+                responseTime.textContent = `${endTime - startTime}ms`;
+                
+                checkForFlags(JSON.stringify(data));
+            } catch (error) {
+                document.getElementById('playgroundResponse').style.display = 'block';
+                document.getElementById('responseBody').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function showHint() {
+            const activeBtn = document.querySelector('.endpoint-btn.active');
+            const endpoint = activeBtn.dataset.endpoint;
+            const hintBox = document.getElementById('hintBox');
+            hintBox.textContent = '💡 ' + (hints[endpoint] || 'Tente usar aspas simples para testar a vulnerabilidade');
+            hintBox.style.display = 'block';
+        }
+
+        // Funções dos desafios individuais
+        async function runChallenge1() {
+            const payload = document.getElementById('challenge1Input').value;
+            const url = `/api/vulnerable/users?role=${encodeURIComponent(payload)}`;
+            await runChallengeRequest(url, 'challenge1Response', 'challenge1Body');
+        }
+
+        async function runChallenge2() {
+            const payload = document.getElementById('challenge2Input').value;
+            const url = `/api/vulnerable/users?role=${encodeURIComponent(payload)}`;
+            await runChallengeRequest(url, 'challenge2Response', 'challenge2Body');
+        }
+
+        async function runLoginChallenge() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/api/vulnerable/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                
+                document.getElementById('loginResponse').style.display = 'block';
+                document.getElementById('loginBody').textContent = JSON.stringify(data, null, 2);
+                
+                checkForFlags(JSON.stringify(data));
+            } catch (error) {
+                document.getElementById('loginBody').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        async function runChallenge4() {
+            const payload = document.getElementById('challenge4Input').value;
+            const url = `/api/vulnerable/product/${encodeURIComponent(payload)}`;
+            await runChallengeRequest(url, 'challenge4Response', 'challenge4Body');
+        }
+
+        async function runChallenge5() {
+            const payload = document.getElementById('challenge5Input').value;
+            const url = `/api/vulnerable/promo?code=${encodeURIComponent(payload)}`;
+            await runChallengeRequest(url, 'challenge5Response', 'challenge5Body');
+        }
+
+        async function runChallenge6() {
+            const payload = document.getElementById('challenge6Input').value;
+            const url = `/api/vulnerable/notes?priority=${encodeURIComponent(payload)}`;
+            await runChallengeRequest(url, 'challenge6Response', 'challenge6Body');
+        }
+
+        async function runChallengeRequest(url, responseId, bodyId) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                document.getElementById(responseId).style.display = 'block';
+                document.getElementById(bodyId).textContent = JSON.stringify(data, null, 2);
+                
+                checkForFlags(JSON.stringify(data));
+            } catch (error) {
+                document.getElementById(bodyId).textContent = `Erro: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

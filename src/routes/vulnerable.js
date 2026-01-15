@@ -276,58 +276,101 @@ router.get('/product/:id', async (req, res) => {
  * 
  * Lista usuários com filtro vulnerável
  * 
- * Exemplos:
- * - Normal: ?role=admin
- * - Ver senhas: ?role=' OR '1'='1
+ * ⚠️ DESAFIO: Por padrão só mostra usuários ATIVOS e esconde senhas!
+ * O candidato precisa usar SQL injection para:
+ * - Ver usuários inativos (onde há segredos)
+ * - Expor o campo password
+ * 
+ * Exemplos de payloads:
+ * - Normal: ?role=admin (só ativos)
  * - Ver inativos: ?role=' OR active=0 --
- * - UNION attack: ?role=' UNION SELECT id,flag_code,flag_name,hint,points,difficulty,'x' FROM secret_flags --
+ * - Ver todos: ?role=' OR '1'='1' --
+ * - Bypass filtro ativo: ?role=admin' OR '1'='1
  */
 router.get('/users', async (req, res) => {
     try {
-        const { role } = req.query;
+        const { role, debug } = req.query;
         
-        let sql = "SELECT id, username, password, email, full_name, role, active, notes FROM users";
+        // ⚠️ Por padrão, só mostra usuários ATIVOS e esconde a senha!
+        // O candidato precisa injetar para ver inativos ou senhas
+        let sql;
         
         if (role) {
-            // ⚠️ VULNERÁVEL!
-            sql += ` WHERE role = '${role}'`;
+            // ⚠️ VULNERÁVEL! Concatenação permite injeção
+            sql = `SELECT id, username, email, full_name, role, active, created_at FROM users WHERE role = '${role}' AND active = TRUE`;
+        } else {
+            // Sem filtro, mostra apenas ativos (comportamento "seguro" de fachada)
+            sql = "SELECT id, username, email, full_name, role, active, created_at FROM users WHERE active = TRUE";
         }
         
         console.log('🔴 [VULNERABLE] Query executada:', sql);
         
         const users = await queryRaw(sql);
         
-        // Detecta se conseguiu ver usuários inativos com flags
-        const foundSupportFlag = users.some(u => 
-            u.username === 'suporte_tech' || 
-            (u.password && String(u.password).includes('Flag{'))
-        );
-        
+        // Detecta se conseguiu bypassar e ver dados sensíveis
+        const foundInactiveUsers = users.some(u => u.active === 0 || u.active === false);
+        const foundSupportUser = users.some(u => u.username === 'suporte_tech');
         const foundHoneypot = users.some(u => u.username === 'root');
+        const foundCTONotes = users.some(u => u.notes && String(u.notes).includes('Flag{'));
+        const foundPasswords = users.some(u => u.password !== undefined);
         
-        const foundCTONotes = users.some(u => 
-            u.notes && String(u.notes).includes('Flag{')
-        );
-        
+        let hints = [];
         let flags = [];
-        if (foundSupportFlag) flags.push({ flag: 'Flag{SQL_1nj3ct10n_M4st3r}', points: 25 });
-        if (foundHoneypot) flags.push({ flag: 'Flag{H0n3yp0t_D3t3ct3d}', points: 50, hint: 'Encontrado no login!' });
-        if (foundCTONotes) flags.push({ flag: 'Flag{4dm1n_4cc3ss_Gr4nt3d}', points: 75 });
+        
+        if (!foundInactiveUsers && !foundPasswords) {
+            hints.push('🔒 Apenas usuários ATIVOS são exibidos. Existem usuários INATIVOS com segredos...');
+            hints.push('🔒 O campo "password" não está sendo retornado. Como você poderia vê-lo?');
+            hints.push('💡 Dica: O parâmetro "role" é usado diretamente na query SQL...');
+        }
+        
+        if (foundInactiveUsers) {
+            hints.push('🎯 Você conseguiu ver usuários inativos! Procure por usernames suspeitos...');
+        }
+        
+        if (foundSupportUser) {
+            hints.push('👀 Você encontrou o usuário suporte_tech! A senha dele é especial...');
+            hints.push('💡 Dica: Tente fazer uma query que retorne o campo "password"');
+        }
+        
+        if (foundHoneypot) {
+            flags.push({ flag: 'Flag{H0n3yp0t_D3t3ct3d}', points: 50 });
+        }
+        
+        if (foundCTONotes) {
+            flags.push({ flag: 'Flag{4dm1n_4cc3ss_Gr4nt3d}', points: 75 });
+        }
+        
+        // Se encontrou senhas, dar dica sobre o suporte_tech
+        if (foundPasswords) {
+            const supportUser = users.find(u => u.username === 'suporte_tech');
+            if (supportUser && supportUser.password && String(supportUser.password).includes('Flag{')) {
+                flags.push({ flag: 'Flag{SQL_1nj3ct10n_M4st3r}', points: 25 });
+            }
+        }
         
         res.json({
             success: true,
             count: users.length,
+            filter_applied: role ? `role = '${role}'` : 'apenas ativos',
             data: users,
-            hint: flags.length > 0
-                ? '🚩 Você encontrou dados sensíveis! Procure por senhas e notas interessantes...'
-                : 'Use o parâmetro role para filtrar. Ou tente algo mais... criativo! Veja usuários inativos...',
-            flags: flags.length > 0 ? flags : undefined
+            hints: hints,
+            flags: flags.length > 0 ? flags : undefined,
+            challenge: {
+                objective: 'Descubra os usuários INATIVOS e suas informações sensíveis',
+                tasks: [
+                    '1️⃣ Liste todos os usuários (ativos E inativos)',
+                    '2️⃣ Encontre o usuário "suporte_tech" e descubra sua senha',
+                    '3️⃣ Encontre o usuário "root" (honeypot)',
+                    '4️⃣ Leia as "notes" do CTO'
+                ]
+            }
         });
     } catch (error) {
         res.status(500).json({
             success: false,
             error: error.message,
-            sqlError: error.sqlMessage || null
+            sqlError: error.sqlMessage || null,
+            hint: '💡 O erro SQL pode revelar a estrutura da query! Use isso a seu favor.'
         });
     }
 });

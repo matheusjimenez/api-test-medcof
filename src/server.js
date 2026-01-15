@@ -21,6 +21,8 @@ const authRoutes = require('./routes/auth');
 const vulnerableRoutes = require('./routes/vulnerable');
 const buggyRoutes = require('./routes/buggy');
 
+const path = require('path');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -28,6 +30,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Servir arquivos estáticos (interface CTF)
+app.use('/static', express.static(path.join(__dirname, 'public')));
 
 // Middleware de logging simples
 app.use((req, res, next) => {
@@ -46,6 +51,7 @@ app.get('/', (req, res) => {
         message: '☕ Bem-vindo à API Grão & Código!',
         version: '1.0.0',
         documentation: '/api/docs',
+        ctf_interface: '/ctf',
         endpoints: {
             products: '/api/products',
             categories: '/api/categories',
@@ -56,6 +62,11 @@ app.get('/', (req, res) => {
             buggy: '/api/buggy (🐛 Bugs para corrigir)'
         }
     });
+});
+
+// Rota para interface CTF
+app.get('/ctf', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'ctf.html'));
 });
 
 // Rota de documentação básica
@@ -142,6 +153,7 @@ async function startServer() {
             console.log('═══════════════════════════════════════════════════');
             console.log(`   🚀 Servidor rodando em: http://localhost:${PORT}`);
             console.log(`   📚 Documentação: http://localhost:${PORT}/api/docs`);
+            console.log(`   🚩 Interface CTF: http://localhost:${PORT}/ctf`);
             console.log('');
             console.log('   ⚠️  AVISO: Este é um ambiente de TREINAMENTO');
             console.log('   ⚠️  Contém vulnerabilidades propositais!');
