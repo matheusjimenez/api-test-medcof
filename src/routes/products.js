@@ -180,31 +180,45 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, price, stock, category_id, active } = req.body;
-        
+
         // Verifica se o produto existe
         const [existing] = await query('SELECT id FROM products WHERE id = ?', [id]);
-        
+
         if (!existing) {
             return res.status(404).json({
                 success: false,
                 error: 'Produto não encontrado'
             });
         }
+
+        // Define os campos permitidos para atualização
+        const allowedFields = ['name', 'description', 'price', 'stock', 'category_id', 'active'];
         
-        const sql = `
-            UPDATE products 
-            SET 
-                name = COALESCE(?, name),
-                description = COALESCE(?, description),
-                price = COALESCE(?, price),
-                stock = COALESCE(?, stock),
-                category_id = COALESCE(?, category_id),
-                active = COALESCE(?, active)
-            WHERE id = ?
-        `;
-        
-        await query(sql, [name, description, price, stock, category_id, active, id]);
+        // Constrói dinamicamente apenas com os campos enviados no body
+        const updates = [];
+        const values = [];
+
+        for (const field of allowedFields) {
+            if (req.body.hasOwnProperty(field)) {
+                updates.push(`${field} = ?`);
+                values.push(req.body[field]);
+            }
+        }
+
+        // Se nenhum campo foi enviado para atualização
+        if (updates.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Nenhum campo válido para atualização foi fornecido'
+            });
+        }
+
+        // Adiciona o id ao final dos valores para o WHERE
+        values.push(id);
+
+        const sql = `UPDATE products SET ${updates.join(', ')} WHERE id = ?`;
+
+        await query(sql, values);
         
         // Busca o produto atualizado
         const [updated] = await query('SELECT * FROM products WHERE id = ?', [id]);
